@@ -45,7 +45,11 @@ def index_to_position(index: Index, strides: Strides) -> int:
 
     """
     # TODO: Implement for Task 2.1.
-    raise NotImplementedError("Need to implement for Task 2.1")
+    # raise NotImplementedError("Need to implement for Task 2.1")
+    if len(index) != len(strides):
+        raise IndexingError("Index and strides must have the same length")
+    result = sum([i * s for i, s in zip(index, strides)])
+    return result
 
 
 def to_index(ordinal: int, shape: Shape, out_index: OutIndex) -> None:
@@ -61,7 +65,8 @@ def to_index(ordinal: int, shape: Shape, out_index: OutIndex) -> None:
 
     """
     # TODO: Implement for Task 2.1.
-    raise NotImplementedError("Need to implement for Task 2.1")
+    raise NotImplementedError("Need to· implement for Task 2.1")
+
 
 
 def broadcast_index(
