@@ -200,7 +200,7 @@ class Scalar:
 
     def __hash__(self):
         return hash(self.unique_id)
-    
+
     def __gt__(self, b: ScalarLike) -> Scalar:
         return LT.apply(b, self)
 

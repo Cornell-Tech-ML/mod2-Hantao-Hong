@@ -37,10 +37,12 @@ def index_to_position(index: Index, strides: Strides) -> int:
     storage based on strides.
 
     Args:
+    ----
         index : index tuple of ints
         strides : tensor strides
 
     Returns:
+    -------
         Position in storage
 
     """
@@ -59,6 +61,7 @@ def to_index(ordinal: int, shape: Shape, out_index: OutIndex) -> None:
     may not be the inverse of `index_to_position`.
 
     Args:
+    ----
         ordinal: ordinal position to convert.
         shape : tensor shape.
         out_index : return index corresponding to position.
@@ -83,18 +86,22 @@ def broadcast_index(
     removed.
 
     Args:
+    ----
         big_index : multidimensional index of bigger tensor
         big_shape : tensor shape of bigger tensor
         shape : tensor shape of smaller tensor
         out_index : multidimensional index of smaller tensor
 
     Returns:
+    -------
         None
 
     """
     # TODO: Implement for Task 2.2.
     # raise NotImplementedError("Need to implement for Task 2.2")
-    assert len(big_index) == len(big_shape), "big_index and big_shape must have the same length"
+    assert len(big_index) == len(
+        big_shape
+    ), "big_index and big_shape must have the same length"
     assert len(out_index) == len(shape), "out_index and shape must have the same length"
 
     big_dims = len(big_shape)
@@ -111,21 +118,22 @@ def broadcast_index(
                 raise IndexingError("big_shape and shape must match")
             else:
                 out_index[i] = big_index[i + dim_diff]
-        
-
 
 
 def shape_broadcast(shape1: UserShape, shape2: UserShape) -> UserShape:
     """Broadcast two shapes to create a new union shape.
 
     Args:
+    ----
         shape1 : first shape
         shape2 : second shape
 
     Returns:
+    -------
         broadcasted shape
 
     Raises:
+    ------
         IndexingError : if cannot broadcast
 
     """
@@ -135,7 +143,7 @@ def shape_broadcast(shape1: UserShape, shape2: UserShape) -> UserShape:
     dims2 = len(shape2)
     max_dims = max(dims1, dims2)
 
-    result : UserShape = [0] * max_dims
+    result: UserShape = [0] * max_dims
 
     a_rev = list(reversed(shape1))
     b_rev = list(reversed(shape2))
@@ -201,7 +209,8 @@ class TensorData:
     def is_contiguous(self) -> bool:
         """Check that the layout is contiguous, i.e. outer dimensions have bigger strides than inner dimensions.
 
-        Returns:
+        Returns
+        -------
             bool : True if contiguous
 
         """
@@ -217,13 +226,16 @@ class TensorData:
         """Broadcast two shapes to create a new union shape.
 
         Args:
+        ----
             shape_a : first shape
             shape_b : second shape
 
         Returns:
+        -------
             broadcasted shape
 
         Raises:
+        ------
             IndexingError : if cannot broadcast
 
         """
@@ -233,9 +245,11 @@ class TensorData:
         """Convert a multidimensional index or single integer index to a single-dimensional position in storage.
 
         Args:
+        ----
             index: A multidimensional index (tuple of ints) or a single integer index.
 
         Returns:
+        -------
             int: The single-dimensional position in storage.
 
         """
@@ -277,9 +291,11 @@ class TensorData:
         """Retrieve the value at the specified index.
 
         Args:
+        ----
             key: A multidimensional index (tuple of ints).
 
         Returns:
+        -------
             float: The value at the specified index.
 
         """
@@ -290,6 +306,7 @@ class TensorData:
         """Set the value at the specified index.
 
         Args:
+        ----
             key: A multidimensional index (tuple of ints).
             val: The value to set at the specified index.
 
@@ -304,9 +321,11 @@ class TensorData:
         """Permute the dimensions of the tensor.
 
         Args:
+        ----
             *order: a permutation of the dimensions
 
         Returns:
+        -------
             New `TensorData` with the same storage and a new dimension order.
 
         """
@@ -316,7 +335,11 @@ class TensorData:
 
         # TODO: Implement for Task 2.1.
         # raise NotImplementedError("Need to implement for Task 2.1")
-        return TensorData(self._storage, tuple([self.shape[i] for i in order]), tuple([self.strides[i] for i in order]))
+        return TensorData(
+            self._storage,
+            tuple([self.shape[i] for i in order]),
+            tuple([self.strides[i] for i in order]),
+        )
 
     def to_string(self) -> str:
         """Convert to string"""

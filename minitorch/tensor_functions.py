@@ -113,6 +113,7 @@ class All(Function):
 
 # TODO: Implement for Task 2.3.
 
+
 class Mul(Function):
     @staticmethod
     def forward(ctx: Context, t1: Tensor, t2: Tensor) -> Tensor:
@@ -134,17 +135,21 @@ class Sigmoid(Function):
     @staticmethod
     def forward(ctx: Context, a: Tensor) -> Tensor:
         """Forward pass for the Sigmoid function."""
-        ctx.save_for_backward(a.f.sigmoid_map(a))
-        return a.f.sigmoid_map(a)
+        a_sig = a.f.sigmoid_map(a)
+        ctx.save_for_backward(a_sig)
+        return a_sig
 
     @staticmethod
     def backward(ctx: Context, grad_output: Tensor) -> Tensor:
         """Backward pass for the Sigmoid function."""
         (sig,) = ctx.saved_values
         return grad_output.f.mul_zip(
-            grad_output.f.mul_zip(sig, grad_output.f.neg_map(sig)), 
-            grad_output
+            grad_output.f.mul_zip(
+                sig, grad_output.f.add_zip(tensor(1), sig.f.neg_map(sig))
+            ),
+            grad_output,
         )
+
 
 class ReLU(Function):
     @staticmethod
@@ -158,6 +163,7 @@ class ReLU(Function):
         """Backward pass for the ReLU function."""
         (t1,) = ctx.saved_values
         return grad_output.f.relu_back_zip(t1, grad_output)
+
 
 class Log(Function):
     @staticmethod
@@ -177,13 +183,15 @@ class Exp(Function):
     @staticmethod
     def forward(ctx: Context, a: Tensor) -> Tensor:
         """Forward pass for the Exp function."""
-        ctx.save_for_backward(a.f.exp_map(a))
-        return a.f.exp_map(a)
+        a_exp = a.f.exp_map(a)
+        ctx.save_for_backward(a_exp)
+        return a_exp
 
     @staticmethod
     def backward(ctx: Context, grad_output: Tensor) -> Tensor:
         """Backward pass for the Exp function."""
-        return grad_output.f.mul_zip(grad_output, grad_output)
+        (a_exp,) = ctx.saved_values
+        return grad_output.f.mul_zip(a_exp, grad_output)
 
 
 class Sum(Function):
@@ -191,15 +199,15 @@ class Sum(Function):
     def forward(ctx: Context, a: Tensor, dim: Tensor) -> Tensor:
         """Forward pass for the Sum function."""
         ctx.save_for_backward(a.shape, dim)
-        
+
         return a.f.add_reduce(a, int(dim.item()))
-        
 
     @staticmethod
-    def backward(ctx: Context, grad_output: Tensor) -> Tuple[Tensor, None]:
+    def backward(ctx: Context, grad_output: Tensor) -> Tuple[Tensor, float]:
         """Backward pass for the Sum function."""
         a, dim = ctx.saved_values
-        return grad_output, None
+        return grad_output, 0.0
+
 
 class LT(Function):
     @staticmethod
@@ -236,20 +244,17 @@ class Permute(Function):
     @staticmethod
     def forward(ctx: Context, a: Tensor, order: Tensor) -> Tensor:
         """Forward pass for the Permute function."""
-        ordered_list = order.to_numpy().tolist()
+        ordered_list = order.to_numpy().astype(int).tolist()
         ctx.save_for_backward(ordered_list)
-        return minitorch.Tensor(a._tensor.permute(ordered_list), backend=a.backend)
+        return a._new(a._tensor.permute(*ordered_list))
 
     @staticmethod
     def backward(ctx: Context, grad_output: Tensor) -> Tuple[Tensor, float]:
         """Backward pass for the Permute function."""
-        (a_shape,) = ctx.saved_values
-        return (
-            minitorch.Tensor.make(
-                grad_output._tensor._storage, a_shape, backend=grad_output.backend
-            ),
-            0.
-        )
+        (order_list,) = ctx.saved_values
+        order_list = np.argsort(order_list)
+        return grad_output._new(grad_output._tensor.permute(*order_list)), 0.0
+
 
 class View(Function):
     @staticmethod

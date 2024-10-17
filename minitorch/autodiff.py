@@ -101,10 +101,9 @@ def topological_sort(variable: Variable) -> Iterable[Variable]:
                     visit(m)
         seen.add(var.unique_id)
         order.insert(0, var)
-    
+
     visit(variable)
     return order
-
 
     # raise NotImplementedError("Need to implement for Task 1.4")
 
