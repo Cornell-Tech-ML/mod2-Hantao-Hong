@@ -134,6 +134,7 @@ class Sigmoid(Function):
     @staticmethod
     def forward(ctx: Context, a: Tensor) -> Tensor:
         """Forward pass for the Sigmoid function."""
+        ctx.save_for_backward(a.f.sigmoid_map(a))
         return a.f.sigmoid_map(a)
 
     @staticmethod
@@ -176,6 +177,7 @@ class Exp(Function):
     @staticmethod
     def forward(ctx: Context, a: Tensor) -> Tensor:
         """Forward pass for the Exp function."""
+        ctx.save_for_backward(a.f.exp_map(a))
         return a.f.exp_map(a)
 
     @staticmethod
@@ -188,7 +190,7 @@ class Sum(Function):
     @staticmethod
     def forward(ctx: Context, a: Tensor, dim: Tensor) -> Tensor:
         """Forward pass for the Sum function."""
-        ctx.save_for_backward(a, dim)
+        ctx.save_for_backward(a.shape, dim)
         
         return a.f.add_reduce(a, int(dim.item()))
         
@@ -234,8 +236,9 @@ class Permute(Function):
     @staticmethod
     def forward(ctx: Context, a: Tensor, order: Tensor) -> Tensor:
         """Forward pass for the Permute function."""
-        ctx.save_for_backward(a.shape)
-        return minitorch.Tensor(a._tensor.permute(*order.to_numpy()), backend=a.backend)
+        ordered_list = order.to_numpy().tolist()
+        ctx.save_for_backward(ordered_list)
+        return minitorch.Tensor(a._tensor.permute(ordered_list), backend=a.backend)
 
     @staticmethod
     def backward(ctx: Context, grad_output: Tensor) -> Tuple[Tensor, float]:

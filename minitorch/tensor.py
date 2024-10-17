@@ -379,8 +379,9 @@ class Tensor:
 
         """
         if dim is None:
-            dim = Tensor.make([0], (1,), backend=self.backend)
-        return All.apply(self, self._ensure_tensor(dim))
+            return All.apply(self.view((self.size,)), self._ensure_tensor(0))
+        else:
+            return All.apply(self, self._ensure_tensor(dim))
 
     def is_close(self, other: Tensor) -> Tensor:
         """Check if all elements in the tensor are close to another tensor.
@@ -479,7 +480,7 @@ class Tensor:
             Tensor: A tensor with the new shape.
 
         """
-        return View.apply(self, tensor(shape))
+        return View.apply(self, tensor(list(shape)))
 
     def zero_grad_(self) -> None:
         """Zero out the gradient of the tensor."""
